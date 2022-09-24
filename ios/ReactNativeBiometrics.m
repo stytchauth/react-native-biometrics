@@ -123,12 +123,15 @@ RCT_EXPORT_METHOD(createSignature: (NSDictionary *)params resolver:(RCTPromiseRe
     NSString *promptMessage = [RCTConvert NSString:params[@"promptMessage"]];
     NSString *payload = [RCTConvert NSString:params[@"payload"]];
 
+    LAContext *context = [[LAContext alloc] init];
+    context.localizedReason = promptMessage;
+
     NSData *biometricKeyService = [self getBiometricKeyService];
     NSDictionary *query = @{
-                            (id)kSecUseOperationPrompt: promptMessage
                             (id)kSecClass: (id)kSecClassGenericPassword,
                             (id)kSecAttrService: biometricKeyService,
                             (id)kSecReturnData: @YES,
+                            (id)kSecUseAuthenticationContext: context,
                             };
     NSData *privateKey;
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFDataRef *)&privateKey);
@@ -222,10 +225,12 @@ RCT_EXPORT_METHOD(biometricKeysExist: (RCTPromiseResolveBlock)resolve rejecter:(
 
 - (BOOL) doesBiometricKeyExist {
   NSString *biometricKeyService = [self getBiometricKeyService];
+  LAContext *context = [[LAContext alloc] init];
+  context.interactionNotAllowed = @(YES);
   NSDictionary *searchQuery = @{
-                                (id)kSecUseAuthenticationUI: (id)kSecUseAuthenticationUIFail
                                 (id)kSecClass: (id)kSecClassGenericPassword,
                                 (id)kSecAttrService: biometricKeyService,
+                                (id)kSecUseAuthenticationContext: context
                                 };
 
   OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)searchQuery, nil);
