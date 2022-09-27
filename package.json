@@ -43,6 +43,6 @@
     "url": "https://github.com/SelfLender/react-native-biometrics/issues"
   },
   "devDependencies": {
-    "typescript": "^3.7.2"
+    "typescript": "^4.8.2"
   }
 }
